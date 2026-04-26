@@ -17,6 +17,17 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t mon-app:latest .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                sh 'docker run -d -p 8080:8080 --name mon-app mon-app:latest'
+            }
+        }
 
         stage('Test') {
             steps {
