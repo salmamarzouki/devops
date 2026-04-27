@@ -14,12 +14,17 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                dir('achat') {
+                    sh 'mvn clean package -DskipTests'
+                }
             }
         }
+
         stage('Docker Build') {
             steps {
-                sh 'docker build -t mon-app:latest .'
+                dir('achat') {
+                    sh 'docker build -t mon-app:latest .'
+                }
             }
         }
 
@@ -31,18 +36,20 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                dir('achat') {
+                    sh 'mvn test'
+                }
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'
+                    junit 'achat/**/target/surefire-reports/*.xml'
                 }
             }
         }
 
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'achat/target/*.jar', fingerprint: true
             }
         }
     }
