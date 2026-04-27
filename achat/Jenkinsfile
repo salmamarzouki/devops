@@ -15,6 +15,16 @@ pipeline {
         }
 
     
+        stage('SonarQube Analysis') {
+            steps {
+                dir('achat') {
+                    withSonarQubeEnv('sonar') {
+                        sh 'mvn sonar:sonar'
+                    }
+                }
+            }
+        }
+
         stage('Test') {
             steps {
                 dir('achat') {
@@ -24,6 +34,14 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'achat/**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Nexus Upload') {
+            steps {
+                dir('achat') {
+                    sh 'mvn deploy -DskipTests'
                 }
             }
         }
