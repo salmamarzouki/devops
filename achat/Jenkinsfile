@@ -6,12 +6,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build') {
             steps {
                 dir('achat') {
@@ -30,7 +24,8 @@ pipeline {
 
         stage('Docker Run') {
             steps {
-                sh 'docker run -d -p 8080:8080 --name mon-app mon-app:latest'
+                sh 'docker rm -f mon-app || true'
+                sh 'docker run -d -p 8081:8080 --name mon-app mon-app:latest'
             }
         }
 
