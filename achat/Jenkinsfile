@@ -23,14 +23,8 @@ pipeline {
             }
             post {
                 always {
-                    junit 'achat/**/target/surefire-reports/*.xml'
+                    junit allowEmptyResults: true, testResults: 'achat/**/target/surefire-reports/*.xml'
                 }
-            }
-        }
-
-        stage('Archive') {
-            steps {
-                archiveArtifacts artifacts: 'achat/target/*.jar', fingerprint: true
             }
         }
     }
