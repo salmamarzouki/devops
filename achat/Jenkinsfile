@@ -14,21 +14,7 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                dir('achat') {
-                    sh 'docker build -t mon-app:latest .'
-                }
-            }
-        }
-
-        stage('Docker Run') {
-            steps {
-                sh 'docker rm -f mon-app || true'
-                sh 'docker run -d -p 8081:8080 --name mon-app mon-app:latest'
-            }
-        }
-
+    
         stage('Test') {
             steps {
                 dir('achat') {
