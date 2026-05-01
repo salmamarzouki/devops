@@ -1,17 +1,14 @@
 pipeline {
     agent any
-
     tools {
         maven 'Maven'
     }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('Build') {
             steps {
                 dir('achat') {
@@ -19,7 +16,6 @@ pipeline {
                 }
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
                 dir('achat') {
@@ -29,7 +25,6 @@ pipeline {
                 }
             }
         }
-
         stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
@@ -37,7 +32,13 @@ pipeline {
                 }
             }
         }
-
+        stage('Deploy to Nexus') {
+            steps {
+                dir('achat') {
+                    sh 'mvn deploy -DskipTests -s /var/jenkins_home/.m2/settings.xml'
+                }
+            }
+        }
         stage('Docker Build') {
             steps {
                 dir('achat') {
@@ -45,13 +46,15 @@ pipeline {
                 }
             }
         }
-
         stage('Docker Run') {
             steps {
-                sh 'docker run -d -p 8080:8080 --name mon-app mon-app:latest'
+                sh '''
+                    docker stop mon-app || true
+                    docker rm mon-app || true
+                    docker run -d -p 8080:8080 --name mon-app mon-app:latest
+                '''
             }
         }
-
         stage('Test') {
             steps {
                 dir('achat') {
@@ -64,20 +67,18 @@ pipeline {
                 }
             }
         }
-
         stage('Archive') {
             steps {
                 archiveArtifacts artifacts: 'achat/target/*.jar', fingerprint: true
             }
         }
     }
-
     post {
         success {
-            echo 'Build réussi !'
+            echo 'Build reussi !'
         }
         failure {
-            echo 'Build en échec.'
+            echo 'Build en echec.'
         }
     }
 }
