@@ -51,7 +51,7 @@ pipeline {
                 sh '''
                     docker stop mon-app || true
                     docker rm mon-app || true
-                    docker run -d -p 8080:8080 --name mon-app mon-app:latest
+                    docker run -d -p 9090:8080 --name mon-app mon-app:latest
                 '''
             }
         }
