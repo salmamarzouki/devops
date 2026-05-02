@@ -1,7 +1,5 @@
 version: '3.8'
-
 services:
-  # Base de données pour SonarQube
   db_sonar:
     image: postgres:12
     container_name: db_sonar
@@ -12,7 +10,6 @@ services:
     volumes:
       - postgresql:/var/lib/postgresql/data
 
-  # SonarQube
   sonarqube:
     image: sonarqube:lts-community
     container_name: sonarqube
@@ -29,7 +26,6 @@ services:
     depends_on:
       - db_sonar
 
-  # Nexus Repository Manager
   nexus:
     image: sonatype/nexus3
     container_name: nexus
@@ -38,9 +34,39 @@ services:
     volumes:
       - nexus_data:/nexus-data
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - devops-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - devops-network
+
 volumes:
   postgresql:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_logs:
   nexus_data:
+  grafana_data:
+
+networks:
+  devops-network:
+    external: true
